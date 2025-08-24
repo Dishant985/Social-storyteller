@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C4 Social Good Storytelling Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #chat-window::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-window::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        #chat-window::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 3px;
+        }
+        #chat-window::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .chat-button {
+            cursor: pointer;
+            background-color: #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .chat-button:hover {
+            background-color: #cbd5e1;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center h-screen">
+
+    <div class="w-full max-w-2xl h-full sm:h-[90vh] sm:max-h-[700px] flex flex-col bg-white rounded-2xl shadow-2xl overflow-hidden">
+        
+        <header class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-4 sm:p-6 shadow-md z-10">
+            <h1 class="text-xl sm:text-2xl font-bold text-center">Story & Mission Assistant</h1>
+            <p class="text-center text-sm text-indigo-100 mt-1">Generate stories or analyze your message.</p>
+        </header>
+
+        <div id="chat-window" class="flex-1 p-6 overflow-y-auto">
+            <div id="message-container" class="space-y-6">
+                <!-- Messages will be appended here -->
+            </div>
+        </div>
+
+        <footer class="p-4 bg-slate-50 border-t border-slate-200">
+            <form id="chat-form" class="flex items-center space-x-4">
+                <input 
+                    type="text" 
+                    id="message-input" 
+                    placeholder="Type your message or choose an option..." 
+                    autocomplete="off"
+                    class="flex-1 w-full px-4 py-3 bg-slate-200 text-slate-800 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
+                >
+                <button 
+                    type="submit" 
+                    class="bg-indigo-600 text-white rounded-full p-3 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 ease-in-out transform hover:scale-110"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                </button>
+            </form>
+        </footer>
+    </div>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const messageContainer = document.getElementById('message-container');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        
+        let isBotTyping = false;
+        let chatMode = null; // Can be 'story', 'analyze', or null
+
+        /**
+         * Generates a story based on a keyword.
+         */
+        const generateStory = (keyword) => {
+            const sanitizedKeyword = keyword.trim().toLowerCase();
+            // Story templates... (same as previous version)
+            const templates = [
+                { story: `In a village nestled between dusty hills, a young girl named Elara dreamed of a world filled with **${sanitizedKeyword}**. She saw it in the wildflowers that stubbornly grew in the cracks of the dry earth and heard it in the elders' songs of better days. Her small world was one of resilience, but she yearned for something more tangible for her people.\n\nAround her, the absence of **${sanitizedKeyword}** was a constant shadow. It was in the tired faces of the farmers whose crops failed and in the quiet classrooms where children were too hungry to learn. Elara felt a growing unease; she knew her community deserved more than just survival. The path to change was unclear, but a fire of determination was lit within her.\n\nA group of volunteers arrived one day, their vehicle kicking up a cloud of dust that seemed to carry a new energy. They brought not just resources, but a spark of genuine **${sanitizedKeyword}**. They didn't just build things; they built relationships, sitting with the villagers, listening to their stories, and sharing skills. They worked side-by-side, turning barren plots into thriving gardens and silent rooms into vibrant workshops.\n\nYears later, Elara stands as a leader in her revitalized community. "It all started with a single seed of **${sanitizedKeyword}**," she often says, pointing to the flourishing fields and the bustling school. Her story is a powerful reminder that even the smallest actions, when rooted in compassion, can grow into a forest of change.` },
+                { story: `Leo, a quiet coder from a bustling city, felt the lack of **${sanitizedKeyword}** like a heavy silence amidst the noise. From his apartment window, he saw a million lights representing a million lives, yet he knew many of those lives, like his own, felt deeply disconnected. The city was a marvel of architecture and efficiency, but it had forgotten how to be a community.\n\nThis feeling of isolation was his daily conflict. He saw people move past each other with their heads down, lost in their own worlds. One evening, staring at a derelict, forgotten rooftop across the street, an idea took root. What if that empty space could be filled not with more concrete, but with life? What if it could become a place where people could find **${sanitizedKeyword}**?\n\nHe started a small community garden, a simple act of defiance against the city's loneliness. At first, it was just him, a few bags of soil, and some seeds. Slowly, drawn by curiosity, his neighbors appeared. They planted, they watered, they talked. They shared stories among the budding plants and found common ground. In the shared soil, they rediscovered the **${sanitizedKeyword}** they had been missing.\n\nThat single rooftop garden became a blueprint. Soon, green spaces bloomed across the city's forgotten corners, each one a hub of connection. Leo's small project proved that **${sanitizedKeyword}** isn't something you find, but something you cultivate, together, even in the most unlikely of places.` }
+            ];
+            const template = templates[Math.floor(Math.random() * templates.length)];
+            if (sanitizedKeyword.includes('water')) { return `In a sun-scorched village, the day for young Aisha began not with a school bell, but with the weight of an empty bucket. Her mornings were a silent, miles-long trek to a murky stream, a daily pilgrimage that stole hours of her childhood. The lack of clean **water** was a heavy, invisible burden on her dreams and the future of her entire community.\n\nThe elders spoke of a time when the river ran full, but now, its sluggish trickle was a constant source of sickness and struggle. Every family felt the strain, every child knew the ache of thirst. The problem was so vast it felt permanent, a feature of the landscape as unchangeable as the relentless sun.\n\nThen, a change began, not with a thunderous storm, but with the quiet hum of a drill. A new well, funded by the collective effort of distant supporters, was being built in the village center. The day the first clean, cool **water** gushed from the pump, it felt like a miracle. Cheers erupted, washing over the village like the life-giving stream they had longed for.\n\nAisha now carries a bag of books instead of a bucket. The well brought more than **water**; it brought health, time, and opportunity. Her journey from the dusty path to the classroom shows how a single drop of support, a single act of solidarity, can create an ocean of change for generations to come.`; }
+            if (sanitizedKeyword.includes('educat') || sanitizedKeyword.includes('learn') || sanitizedKeyword.includes('literacy')) { return `For Kael, the world was a beautiful but frustrating puzzle. Street signs were meaningless shapes, newspapers were intricate patterns, and books were locked doors. Living without **literacy** in a world built on words meant that simple tasks were monumental challenges, and opportunities remained forever out of reach.\n\nThis wasn't just an inconvenience; it was a barrier that confined his potential. He was a brilliant storyteller and a quick thinker, but his inability to read and write made him feel invisible. He watched others navigate the world with an ease he could only dream of, the gap between his reality and his aspirations widening with each passing day.\n\nDetermined to change his fate, Kael joined a local adult **literacy** program held in the evenings at a community library. With patient tutors and sheer perseverance, he began to connect the letters to the sounds, the words to their meanings. Each new sentence he could read felt like a victory, unlocking a piece of the world he had been denied.\n\nToday, Kael not only runs his own small business, but he also volunteers at the same library, teaching other adults to read. He shares the gift of **education** with the same passion that once fueled his own struggle. His story is a powerful testament that **literacy** is not just about knowledge; it's about empowerment, dignity, and the freedom to write your own future.`; }
+            return template.story;
+        };
+
+        /**
+         * Analyzes user-provided sentences.
+         */
+        const analyzeText = (text) => {
+            const wordCount = text.trim().split(/\s+/).length;
+            let analysis = `Here's a quick analysis of your message:\n\n`;
+            analysis += `**Core Mission:** Your goal seems to be centered around **${extractTheme(text)}**. This is a strong, clear focus.\n\n`;
+            analysis += `**Emotional Impact:** The language you've used likely makes your audience feel **${getEmotion(text)}**. This is effective for connecting with people on a personal level.\n\n`;
+            analysis += `**Suggestion:** To make this even more powerful, consider telling a story about a single individual who has been impacted by your work. Personal stories make abstract goals feel concrete and relatable.`;
+            return analysis;
+        };
+
+        const extractTheme = (text) => {
+            const lowerText = text.toLowerCase();
+            if (lowerText.includes('water') || lowerText.includes('sanitation')) return 'providing clean water and improving public health';
+            if (lowerText.includes('educat') || lowerText.includes('learn') || lowerText.includes('school')) return 'increasing access to education and learning opportunities';
+            if (lowerText.includes('food') || lowerText.includes('hunger') || lowerText.includes('nutrition')) return 'fighting hunger and improving nutrition';
+            if (lowerText.includes('environment') || lowerText.includes('conserv') || lowerText.includes('planet')) return 'protecting the environment and promoting conservation';
+            return 'creating positive social change';
+        };
+
+        const getEmotion = (text) => {
+            const lowerText = text.toLowerCase();
+            if (lowerText.includes('help') || lowerText.includes('support') || lowerText.includes('community')) return 'hopeful and connected';
+            if (lowerText.includes('challenge') || lowerText.includes('struggle') || lowerText.includes('fight')) return 'inspired and determined';
+            if (lowerText.includes('protect') || lowerText.includes('save') || lowerText.includes('preserve')) return 'a sense of responsibility and urgency';
+            return 'engaged and empathetic';
+        };
+
+        const scrollToBottom = () => { chatWindow.scrollTop = chatWindow.scrollHeight; };
+
+        const displayMessage = (text, sender) => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex items-end gap-2 ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `max-w-xs md:max-w-md lg:max-w-lg px-4 py-3 rounded-2xl ${sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-200 text-slate-800 rounded-bl-none'}`;
+            contentDiv.innerHTML = text.replace(/\n/g, '<br><br>');
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transform = 'translateY(10px)';
+            messageDiv.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            messageDiv.appendChild(contentDiv);
+            messageContainer.appendChild(messageDiv);
+            setTimeout(() => {
+                messageDiv.style.opacity = '1';
+                messageDiv.style.transform = 'translateY(0)';
+                scrollToBottom();
+            }, 10);
+        };
+        
+        const showTypingIndicator = () => {
+            isBotTyping = true;
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex items-end gap-2 justify-start';
+            typingDiv.innerHTML = `<div class="px-4 py-3 rounded-2xl bg-slate-200 text-slate-500 rounded-bl-none"><div class="flex items-center space-x-1"><span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: -0.3s;"></span><span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: -0.15s;"></span><span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></span></div></div>`;
+            messageContainer.appendChild(typingDiv);
+            scrollToBottom();
+        };
+
+        const hideTypingIndicator = () => {
+            isBotTyping = false;
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) typingIndicator.remove();
+        };
+
+        const handleBotResponse = (userInput) => {
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                let botReply = '';
+                if (chatMode === 'story') {
+                    botReply = generateStory(userInput);
+                } else if (chatMode === 'analyze') {
+                    botReply = analyzeText(userInput);
+                }
+                displayMessage(botReply, 'bot');
+                setTimeout(resetChat, 1200);
+            }, 1500 + Math.random() * 800);
+        };
+
+        const resetChat = () => {
+            chatMode = null;
+            displayInitialPrompt();
+        };
+
+        const displayInitialPrompt = () => {
+             const promptText = `What would you like to do?<br><br>
+                <span class="chat-button" onclick="processUserInput('story')">Tell a story from a word</span><br><br>
+                <span class="chat-button" onclick="processUserInput('analyze')">Analyze my mission statement</span>`;
+            displayMessage(promptText, 'bot');
+             messageInput.placeholder = "Choose an option or type your message...";
+        };
+
+        const processUserInput = (userInput) => {
+            const trimmedInput = userInput.trim().toLowerCase();
+            if (!trimmedInput) return;
+
+            if (chatMode === null) {
+                // Mode selection
+                if (trimmedInput.includes('story')) {
+                    chatMode = 'story';
+                    displayMessage("You chose: Story", 'user');
+                    setTimeout(() => displayMessage("Great! Please give me a word or a short phrase to build a story around (e.g., 'Courage', 'Clean Energy').", 'bot'), 500);
+                    messageInput.placeholder = "Enter a word like 'Courage'...";
+                } else if (trimmedInput.includes('analyze')) {
+                    chatMode = 'analyze';
+                    displayMessage("You chose: Analyze", 'user');
+                    setTimeout(() => displayMessage("Excellent! Please paste a few sentences describing your cause or mission.", 'bot'), 500);
+                    messageInput.placeholder = "Paste your mission statement here...";
+                } else {
+                    displayMessage("Sorry, I didn't understand. Please choose 'story' or 'analyze'.", 'bot');
+                }
+            } else {
+                // We are in a mode, process the input
+                displayMessage(userInput, 'user');
+                handleBotResponse(userInput);
+            }
+            messageInput.value = '';
+        };
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (isBotTyping) return;
+            processUserInput(messageInput.value);
+        });
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                displayMessage("Hello! I'm here to help you with your social good messaging.", 'bot');
+                setTimeout(displayInitialPrompt, 1200);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+
